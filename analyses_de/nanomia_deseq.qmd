@@ -16,11 +16,42 @@ library(tidyverse)
 load("txi.RData")
 ```
 
-## Tissue patterns
+## the samples
+
+```{r}
+samples
+```
+
+
+Building on [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#differential-expression-analysis).
+
+
+## collection_id patterns
+
+See if there is an impact from the specimen collected
+
+```{r}
+de_collection  <- DESeqDataSetFromTximport(txi,
+	colData = samples,
+	design = ~ collection_id)
+```
+
+## tissue patterns
 
 ```{r}
 de_tissue  <- DESeqDataSetFromTximport(txi,
 	colData = samples,
 	design = ~ tissue)
+
+de_tissue <- DESeq(de_tissue)
+res_tissue <- results(de_tissue)
 ```
 
+
+## stage patterns
+
+Exclude pneumatophore
+
+## tissue + stage patterns
+
+Exclude pneumatophore
