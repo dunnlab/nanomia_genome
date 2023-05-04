@@ -1,0 +1,26 @@
+---
+title: "Nanomia deseq"
+format: html
+editor: visual
+---
+
+## Set up
+
+```{r}
+#| output: false
+library("DESeq2")
+library(tidyverse)
+```
+
+```{r}
+load("txi.RData")
+```
+
+## Tissue patterns
+
+```{r}
+de_tissue  <- DESeqDataSetFromTximport(txi,
+	colData = samples,
+	design = ~ tissue)
+```
+
