@@ -4,9 +4,9 @@ library("DESeq2")
 
 # Adapted from http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#transcript-abundance-files-and-tximport-tximeta
 
-samples <- read.table("samples.txt", header=TRUE)
+samples <- read.table("samples.txt", header=TRUE, stringsAsFactors = TRUE)
 
-dir_names = paste(samples$sample, ".fastq.quant", sep="")
+dir_names = paste(as.character(samples$sample), ".fastq.quant", sep="")
 
 files <- file.path("quant", dir_names, "quant.sf")
 names(files) <- samples$sample
@@ -29,6 +29,8 @@ tx2gene = data.frame(gene=gene_names, transcript=gene_names, stringsAsFactors=FA
 
 txi <- tximport(files, type="salmon", tx2gene=tx2gene)
 
+
+
 ddsNanomia <- DESeqDataSetFromTximport(txi,
 	colData = samples,
-	design = ~ samples$tissue)
+	design = ~ tissue)
