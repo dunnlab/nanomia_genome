@@ -38,7 +38,7 @@ for fastq_file in ${READ_DIR}*.fastq; do
 
   filename=$(basename "$fastq_file")
   echo "Processing sample ${filename}"
-  salmon quant -i ${REF}.index -l A \
+  salmon quant -i ${REF}.index -l A --gcBias \
          -r ${fastq_file} \
          -p 16 -o quant/${filename}.quant
 done 
