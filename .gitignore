@@ -1,5 +1,7 @@
 .DS_Store
 .Rhistory
+analyses_de/quant/
+*.RData
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
