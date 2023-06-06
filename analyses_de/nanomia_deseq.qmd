@@ -106,7 +106,6 @@ percentVar <- round( 100 * attr(data, "percentVar") )
 		
 pca <- 
   ggplot( data, aes( PC1, PC2, color=tissue, shape=collection_id ) ) +
-  scale_shape_manual(values=0:length(data$collection_id)) + 
   geom_point(size=3) + 
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +  
   ylab(paste0("PC2:",percentVar[2],"% variance"))
