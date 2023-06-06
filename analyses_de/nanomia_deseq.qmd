@@ -19,12 +19,11 @@ load("txi.RData")
 ## the samples
 
 ```{r}
+samples$collection_id <- gsub("-", "", samples$collection_id)
 samples
 ```
 
-
 Building on [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#differential-expression-analysis).
-
 
 ## collection_id patterns
 
@@ -47,7 +46,6 @@ de_tissue <- DESeq(de_tissue)
 res_tissue <- results(de_tissue)
 ```
 
-
 ## stage patterns
 
 Exclude pneumatophore
@@ -55,3 +53,239 @@ Exclude pneumatophore
 ## tissue + stage patterns
 
 Exclude pneumatophore
+
+## collection_id + tissue
+
+This is what the Munro et al analyses were.
+
+```{r}
+de_id_tissue  <- DESeqDataSetFromTximport(txi,
+	colData = samples,
+	design = ~ collection_id + tissue)
+
+de_id_tissue <- DESeq(de_id_tissue)
+res_id_tissue <- results(de_id_tissue)
+```
+
+```{r}
+plotMA1 <- function(ddsMF){
+		  
+			pairs <- combn(as.character(unique(ddsMF$tissue)),2)
+			plotMA1<-list()
+			for(i in seq(from=1, to=ncol(pairs))){
+				resulttable <- DESeq2::results( 
+				  ddsMF,
+				  contrast=c( "tissue", as.character( pairs[,i] ) ), 
+				  pAdjustMethod="bonferroni", alpha=0.05 )
+				resulttable <- as.data.frame(resulttable)
+				resulttable$padj[is.na(resulttable$padj)]<-1
+				
+				plotMA1[[i]] <- 
+				  ggplot(resulttable) + 
+				      geom_point(alpha=0.8,aes(x=log(baseMean),y=log2FoldChange,colour= padj < 0.05)) +
+				      scale_colour_manual(values =c("TRUE"="red","FALSE"="grey40")) +
+				      ggtitle(paste( as.character( pairs[,i]),collapse =" vs " ))
+				plotMA1<<-plotMA1
+			}
+		}
+
+plotMA1(de_id_tissue)
+```
+
+```{r}
+rld <- DESeq2::rlog( de_id_tissue ) #rlog transform
+vsd <- DESeq2::varianceStabilizingTransformation( de_id_tissue ) #variance Stabilizing Transformation
+		
+notAllZero <- ( rowSums( DESeq2::counts( de_id_tissue ) )>0 )
+```
+
+```{r}
+#PCA plot
+data <- DESeq2::plotPCA( rld, intgroup=c("tissue", "collection_id"), returnData=TRUE )
+percentVar <- round( 100 * attr(data, "percentVar") )
+		
+pca <- 
+  ggplot( data, aes( PC1, PC2, color=tissue, shape=collection_id ) ) +
+  scale_shape_manual(values=0:length(data$collection_id)) + 
+  geom_point(size=3) + 
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +  
+  ylab(paste0("PC2:",percentVar[2],"% variance"))
+
+pca
+```
+
+## Munro et al analyses
+
+Reremembering how previous analyses worked here - https://github.com/dunnlab/Siphonophore_Expression/blob/master/Manuscript.Rmd
+
+This function creates the DESeq2 object
+
+https://github.com/caseywdunn/agalmar/blob/e76bcb8180fecca5a7af9fe751b731b37ad265f4/R/utility_functions.R#L318
+
+```{r eval=FALSE}
+#' Creates a DESeqDataSet object
+#'
+#' @param object An Expression object
+#' @param design a formula that explains the project design
+#' @return A DESeqDataSet object
+#' @export
+setMethod( "create_DESeq2", signature( object = "Expression", design = "formula" ),
+	function( object, design ) {
+
+		colData = data.frame(
+			treatment = object@treatment,
+			individual = object@individual,
+			row.names = object@library_id
+		)
+
+		dds = DESeq2::DESeqDataSetFromMatrix(
+				countData = floor( object@x ),
+				colData = colData,
+				design = design
+	        )
+
+		return( dds[ rowSums( DESeq2::counts( dds ) ) > 1, ] )
+	}
+)
+```
+
+It is then called from here
+
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/functions.R#L102
+
+```{r eval=FALSE}
+dgeresults <- function( object ){
+	if( length( levels( object@individual ) ) >=2 ) {
+		
+		ddsMF <- agalmar::create_DESeq2( object, design = ~individual + treatment )
+		
+		###collapse technical replicates
+		
+		run=paste(ddsMF$individual,ddsMF$treatment,sep="_")
+		
+		if(length(unique(run))!=length(run)){
+		ddsMF$run = ddsMF$run=as.numeric(as.factor(run))
+		
+		ddsMF <- DESeq2::collapseReplicates( ddsMF,ddsMF$run, renameCols=FALSE )
+		}
+		
+		ddsMF <- DESeq2::DESeq( ddsMF )
+		
+		#plots
+		
+		plotMA1 <- function(ddsMF){
+		  
+			pairs <- combn(as.character(unique(ddsMF$treatment)),2)
+			plotMA1<-list()
+			for(i in seq(from=1, to=ncol(pairs))){
+				resulttable <- DESeq2::results( ddsMF,contrast=c( "treatment", as.character( pairs[,i] ) ), pAdjustMethod="bonferroni", alpha=0.05 )
+				resulttable <- as.data.frame(resulttable)
+				resulttable$padj[is.na(resulttable$padj)]<-1
+				plotMA1[[i]]<-ggplot(resulttable)+geom_point(alpha=0.8,aes(x=log(baseMean),y=log2FoldChange,colour= padj < 0.05))+scale_colour_manual(values =c("TRUE"="red","FALSE"="grey40"))+ggtitle(paste( as.character( pairs[,i]),collapse =" vs " ))
+				plotMA1<<-plotMA1
+			}
+		}
+
+	  plotMA1(ddsMF)
+		
+		#Transforming data
+		rld <- DESeq2::rlog( ddsMF ) #rlog transform
+		vsd <- DESeq2::varianceStabilizingTransformation( ddsMF ) #variance Stabilizing Transformation
+		
+		notAllZero <- ( rowSums( DESeq2::counts( ddsMF ) )>0 )
+
+		#adding heatmap
+		select <- order( rowMeans( counts( ddsMF,normalized=TRUE ) ), decreasing=TRUE )[1:20]
+		nt <- DESeq2::normTransform( ddsMF )
+		log2.norm.counts <- assay( nt )[ select, ]
+		df <- as.data.frame( ddsMF@colData[ ,c( "treatment","individual" ) ] )
+		
+		count_heatmap <- pheatmap::pheatmap( log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df )
+		
+		rld_heatmap<- pheatmap::pheatmap( assay( rld )[select,], cluster_rows=FALSE, show_rownames=FALSE,
+													cluster_cols=FALSE, annotation_col=df )
+		
+		vsd_heatmap<- pheatmap::pheatmap( assay( vsd )[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df )
+		
+		#sample distances
+		sampleDists <- stats::dist( t( assay( rld ) ) )
+		
+		sampleDistMatrix <- as.matrix( sampleDists )
+		rownames( sampleDistMatrix ) <- paste( rld$treatment, rld$individual, sep="-" )
+		
+		colnames( sampleDistMatrix ) <- NULL
+		colors <- grDevices::colorRampPalette( rev( brewer.pal( 9, "Greens" ) ) )( 255 )
+		distance_heatmap<- pheatmap::pheatmap( sampleDistMatrix, clustering_distance_rows=sampleDists, clustering_distance_cols=sampleDists, col=colors )
+		
+		
+		#PCA plot
+		data <- DESeq2::plotPCA( rld, intgroup=c("treatment", "individual"), returnData=TRUE )
+		percentVar <- round( 100 * attr(data, "percentVar") )
+		
+		pca <- ggplot( data, aes( PC1, PC2, color=individual, shape=treatment ) ) + scale_shape_manual(values=0:length(data$treatment)) + geom_point(size=3) + xlab(paste0("PC1: ",percentVar[1],"% variance")) +  ylab(paste0("PC2:",percentVar[2],"% variance"))
+		
+		setClass("gg")
+		setClass(
+		  Class="DGEplotresults",
+		  representation = representation(
+		    ddsMF="DESeqDataSet",
+		    plotMA="list",
+		    count_heatmap="pheatmap",
+		    rld_heatmap="pheatmap",
+		    vsd_heatmap="pheatmap",
+		    distance_heatmap="pheatmap",
+		    pca="gg",
+		    rld="DESeqTransform",
+		    vsd="DESeqTransform"
+		  )
+		)
+		
+		DGEPlots <- methods::new( "DGEplotresults" )
+		  DGEPlots@ddsMF<-ddsMF
+		  DGEPlots@plotMA<-plotMA1
+		  DGEPlots@count_heatmap<-pheatmap( log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df )
+		  DGEPlots@rld_heatmap<-pheatmap( assay( rld )[select,], cluster_rows=FALSE, show_rownames=FALSE,cluster_cols=FALSE, annotation_col=df )
+		  DGEPlots@vsd_heatmap<-pheatmap( assay( vsd )[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df )
+		  DGEPlots@distance_heatmap<-pheatmap( sampleDistMatrix, clustering_distance_rows=sampleDists, clustering_distance_cols=sampleDists, col=colors )
+		  DGEPlots@pca<-pca
+		  DGEPlots@rld<-rld
+		  DGEPlots@vsd<-vsd
+		  
+	 return(DGEPlots)
+		
+	}
+}
+```
+
+And that function is called here:
+
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript_prep.R#L147
+
+```{r eval=FALSE}
+dge <- lapply( e, dgeresults )
+```
+
+Here is where the PCA is then run:\
+\
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript.Rmd#L1868
+
+```{r eval=FALSE}
+nanomia_data<-DESeq2::plotPCA(dge$`HWI-ST625-51-C02UNACXX-7-NANOMIA`@rld, intgroup=c("treatment", "individual"), returnData=TRUE )
+percentVar_nano <- round( 100 * attr(nanomia_data, "percentVar") )
+
+nanomia_pca <- ggplot(nanomia_data, aes( PC1, PC2, color=individual, shape=treatment ) ) + scale_shape_manual(values=c("Gastrozooid developing"=15,"Gastrozooid mature"=0,"Pneumatophore"=8, "Nectophore developing"=19,"Nectophore developing "=18, "Palpons mature"=2,"Palpons developing"=17,"Gonodendron male"=13,"Gonodendron female"=10)) + geom_point(size=3) + xlab(paste0("PC1: ",percentVar_nano[1],"% variance")) +  ylab(paste0("PC2:",percentVar_nano[2],"% variance")) + guides(shape  = guide_legend(order = 1),color = guide_legend(order = 2))
+
+```
+
+Here is where the plot is generated:
+
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript.Rmd#L1871
+
+```{r eval=FALSE}
+nanomia_pca <- ggplot(nanomia_data, aes( PC1, PC2, color=individual, shape=treatment ) ) + scale_shape_manual(values=c("Gastrozooid developing"=15,"Gastrozooid mature"=0,"Pneumatophore"=8, "Nectophore developing"=19,"Nectophore developing "=18, "Palpons mature"=2,"Palpons developing"=17,"Gonodendron male"=13,"Gonodendron female"=10)) + geom_point(size=3) + xlab(paste0("PC1: ",percentVar_nano[1],"% variance")) +  ylab(paste0("PC2:",percentVar_nano[2],"% variance")) + guides(shape  = guide_legend(order = 1),color = guide_legend(order = 2))
+
+```
+
+And finally here is where it is rendered:
+
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript.Rmd#L1950

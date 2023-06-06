@@ -2,6 +2,8 @@
 .Rhistory
 analyses_de/quant/
 *.RData
+nanomia_deseq_files/
+*.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
