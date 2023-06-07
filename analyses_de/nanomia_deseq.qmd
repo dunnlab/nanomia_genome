@@ -23,6 +23,12 @@ samples$collection_id <- gsub("-", "", samples$collection_id)
 samples
 ```
 
+The missing stages are mature.
+
+```{r}
+samples$stage[is.na(samples$stage)] <- "mature"
+```
+
 Building on [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#differential-expression-analysis).
 
 ## collection_id patterns
@@ -53,6 +59,17 @@ Exclude pneumatophore
 ## tissue + stage patterns
 
 Exclude pneumatophore
+
+```{r}
+de_stage_tissue  <- DESeqDataSetFromTximport(txi,
+	colData = samples,
+	design = ~ collection_id + stage)
+
+de_stage_tissue <- DESeq(de_stage_tissue)
+de_stage_tissue <- results(de_stage_tissue)
+resultsNames(de_stage_tissue)
+res <- results(de_stage_tissue)
+```
 
 ## collection_id + tissue
 
