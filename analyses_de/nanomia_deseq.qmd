@@ -117,6 +117,10 @@ pca
 
 Reremembering how previous analyses worked here - https://github.com/dunnlab/Siphonophore_Expression/blob/master/Manuscript.Rmd
 
+https://github.com/dunnlab/Siphonophore_Expression
+
+https://academic.oup.com/mbe/article/39/2/msac027/6521037
+
 This function creates the DESeq2 object
 
 https://github.com/caseywdunn/agalmar/blob/e76bcb8180fecca5a7af9fe751b731b37ad265f4/R/utility_functions.R#L318
@@ -288,3 +292,11 @@ nanomia_pca <- ggplot(nanomia_data, aes( PC1, PC2, color=individual, shape=treat
 And finally here is where it is rendered:
 
 https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript.Rmd#L1950
+
+### Differential expression analyses
+
+Within species analyses: which genes are specific to particular zooid types?
+
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript.Rmd#L617
+
+https://github.com/dunnlab/Siphonophore_Expression/blob/f1808ad614413d325d9b025b4d06ef604070f5d3/Manuscript.Rmd#L671
