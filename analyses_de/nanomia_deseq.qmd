@@ -10,13 +10,19 @@ editor: visual
 #| output: false
 library("DESeq2")
 library(tidyverse)
+library(apeglm)
+library(pheatmap)
+library(RColorBrewer)
 ```
 
 ```{r}
 load("txi.RData")
 ```
 
-## the samples
+
+```{r}
+
+### the samples
 
 ```{r}
 samples$collection_id <- gsub("-", "", samples$collection_id)
@@ -31,7 +37,13 @@ samples$stage[is.na(samples$stage)] <- "mature"
 
 Building on [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#differential-expression-analysis).
 
-## collection_id patterns
+## QC and overview
+
+
+
+## Factor analyses
+
+### collection_id patterns
 
 See if there is an impact from the specimen collected
 
@@ -41,7 +53,7 @@ de_collection  <- DESeqDataSetFromTximport(txi,
 	design = ~ collection_id)
 ```
 
-## tissue patterns
+### tissue patterns
 
 ```{r}
 de_tissue  <- DESeqDataSetFromTximport(txi,
@@ -52,23 +64,101 @@ de_tissue <- DESeq(de_tissue)
 res_tissue <- results(de_tissue)
 ```
 
-## stage patterns
+### stage patterns
 
 Exclude pneumatophore
 
-## tissue + stage patterns
+## Multifactor designs
 
-Exclude pneumatophore
+### tissue + stage patterns
+
+May want to exclude the pneumatophore from some analyses.
+
+The `results()` function provides an overview of pairwise comparisons for one or more factors.
 
 ```{r}
 de_stage_tissue  <- DESeqDataSetFromTximport(txi,
 	colData = samples,
-	design = ~ collection_id + stage)
+	design = ~ stage + tissue )
 
 de_stage_tissue <- DESeq(de_stage_tissue)
-de_stage_tissue <- results(de_stage_tissue)
-resultsNames(de_stage_tissue)
 res <- results(de_stage_tissue)
+```
+
+```{r}
+res <- results(de_stage_tissue)
+summary(res)
+```
+
+
+```{r}
+sum(res$padj < 0.1, na.rm=TRUE)
+```
+
+
+```{r}
+plotMA(res, ylim=c(-2,2))
+```
+
+
+```{r}
+```
+
+
+```{r}
+resultsNames(de_stage_tissue)
+```
+
+```{r}
+resLFC_mature_vs_developing <- lfcShrink(de_stage_tissue, coef="stage_mature_vs_developing", type="apeglm")
+resLFC_mature_vs_developing
+plotMA(resLFC_mature_vs_developing, ylim=c(-2,2))
+```
+
+```{r}
+ntd <- normTransform(de_stage_tissue)
+
+select <- order(rowMeans(counts(de_stage_tissue,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(de_stage_tissue)[,c("stage","tissue")])
+
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+```
+
+
+```{r}
+vsd_stage_tissue <- vst(de_stage_tissue, blind=FALSE)
+
+
+```
+
+```{r}
+sampleDists <- dist(t(assay(vsd_stage_tissue)))
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vsd_stage_tissue$stage, vsd_stage_tissue$tissue, sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+
+```{r}
+plotPCA(vsd_stage_tissue, intgroup=c("stage", "tissue"))
+```
+
+
+```{r}
+pcaData <- plotPCA(vsd_stage_tissue, intgroup=c("stage", "tissue"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(PC1, PC2, color=tissue, shape=stage)) +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed()
 ```
 
 ## collection_id + tissue
