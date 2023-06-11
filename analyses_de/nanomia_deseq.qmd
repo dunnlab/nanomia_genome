@@ -35,42 +35,84 @@ The missing stages are mature.
 samples$stage[is.na(samples$stage)] <- "mature"
 ```
 
+```{r}
+# where stage="gonodendron", replace stage with stage_sex
+samples$tissue = as.character(samples$tissue)
+samples$tissue <- ifelse(!is.na(samples$sex), paste(samples$tissue, samples$sex, sep = "_"), samples$tissue)
+samples$tissue <- as.factor(samples$tissue)
+```
+
+```{r}
+```
+
+```{r}
+```
+
 Building on [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#differential-expression-analysis).
 
-## QC and overview
+## QC
 
+### Check for collection_id effect
 
-
-## Factor analyses
-
-### collection_id patterns
-
-See if there is an impact from the specimen collected
+This is what the Munro et al analyses were.
 
 ```{r}
-de_collection  <- DESeqDataSetFromTximport(txi,
+de_id_tissue  <- DESeqDataSetFromTximport(txi,
 	colData = samples,
-	design = ~ collection_id)
-```
+	design = ~ collection_id + tissue)
 
-### tissue patterns
+de_id_tissue <- DESeq(de_id_tissue)
+res_id_tissue <- results(de_id_tissue)
+```
 
 ```{r}
-de_tissue  <- DESeqDataSetFromTximport(txi,
-	colData = samples,
-	design = ~ tissue)
+plotMA1 <- function(ddsMF){
+		  
+			pairs <- combn(as.character(unique(ddsMF$tissue)),2)
+			plotMA1<-list()
+			for(i in seq(from=1, to=ncol(pairs))){
+				resulttable <- DESeq2::results( 
+				  ddsMF,
+				  contrast=c( "tissue", as.character( pairs[,i] ) ), 
+				  pAdjustMethod="bonferroni", alpha=0.05 )
+				resulttable <- as.data.frame(resulttable)
+				resulttable$padj[is.na(resulttable$padj)]<-1
+				
+				plotMA1[[i]] <- 
+				  ggplot(resulttable) + 
+				      geom_point(alpha=0.8,aes(x=log(baseMean),y=log2FoldChange,colour= padj < 0.05)) +
+				      scale_colour_manual(values =c("TRUE"="red","FALSE"="grey40")) +
+				      ggtitle(paste( as.character( pairs[,i]),collapse =" vs " ))
+				plotMA1<<-plotMA1
+			}
+		}
 
-de_tissue <- DESeq(de_tissue)
-res_tissue <- results(de_tissue)
+plotMA1(de_id_tissue)
 ```
 
-### stage patterns
+```{r}
+rld <- DESeq2::rlog( de_id_tissue ) #rlog transform
+vsd <- DESeq2::varianceStabilizingTransformation( de_id_tissue ) #variance Stabilizing Transformation
+		
+notAllZero <- ( rowSums( DESeq2::counts( de_id_tissue ) )>0 )
+```
 
-Exclude pneumatophore
+```{r}
+#PCA plot
+data <- DESeq2::plotPCA( rld, intgroup=c("tissue", "collection_id"), returnData=TRUE )
+percentVar <- round( 100 * attr(data, "percentVar") )
+		
+pca <- 
+  ggplot( data, aes( PC1, PC2, color=tissue, shape=collection_id ) ) +
+  geom_point(size=3) + 
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +  
+  ylab(paste0("PC2:",percentVar[2],"% variance"))
 
-## Multifactor designs
+pca
+```
 
-### tissue + stage patterns
+
+## tissue + stage patterns
 
 May want to exclude the pneumatophore from some analyses.
 
@@ -161,64 +203,92 @@ ggplot(pcaData, aes(PC1, PC2, color=tissue, shape=stage)) +
   coord_fixed()
 ```
 
-## collection_id + tissue
-
-This is what the Munro et al analyses were.
+## Tissue and stage specific effects
 
 ```{r}
-de_id_tissue  <- DESeqDataSetFromTximport(txi,
-	colData = samples,
-	design = ~ collection_id + tissue)
+# get a table of all unique combinations of tissue and stage in the dataset
+tissue_stage <- as.data.frame(unique(samples[,c("tissue","stage")]))
 
-de_id_tissue <- DESeq(de_id_tissue)
-res_id_tissue <- results(de_id_tissue)
+# Order it by tissue and stage
+tissue_stage <- tissue_stage[order(tissue_stage$tissue, tissue_stage$stage),]
+tissue_stage
 ```
 
 ```{r}
-plotMA1 <- function(ddsMF){
-		  
-			pairs <- combn(as.character(unique(ddsMF$tissue)),2)
-			plotMA1<-list()
-			for(i in seq(from=1, to=ncol(pairs))){
-				resulttable <- DESeq2::results( 
-				  ddsMF,
-				  contrast=c( "tissue", as.character( pairs[,i] ) ), 
-				  pAdjustMethod="bonferroni", alpha=0.05 )
-				resulttable <- as.data.frame(resulttable)
-				resulttable$padj[is.na(resulttable$padj)]<-1
-				
-				plotMA1[[i]] <- 
-				  ggplot(resulttable) + 
-				      geom_point(alpha=0.8,aes(x=log(baseMean),y=log2FoldChange,colour= padj < 0.05)) +
-				      scale_colour_manual(values =c("TRUE"="red","FALSE"="grey40")) +
-				      ggtitle(paste( as.character( pairs[,i]),collapse =" vs " ))
-				plotMA1<<-plotMA1
-			}
-		}
 
-plotMA1(de_id_tissue)
+res_all = data.frame()
+res_lfc_all = data.frame()
+
+# loop over rows of tissue_stage
+for (i in 1:nrow(tissue_stage)) {
+	# Set up the focal tissue and stage
+	tissue <- tissue_stage[i,]$tissue
+	stage <- tissue_stage[i,]$stage
+	treatment_name = paste0(tissue, "_", stage)
+	print(treatment_name)
+	samples$focal = c("other")
+	samples$focal[samples$tissue == tissue & samples$stage == stage] = treatment_name
+	samples$focal = factor(samples$focal)
+
+	# Run DESeq2
+	de  <- DESeqDataSetFromTximport(txi,
+		colData = samples,
+		design = ~ focal )
+
+	de <- DESeq(de)
+
+	# Run differential expression analysis
+	res <- results(de, c("focal", treatment_name, "other"))
+	summary(res)
+	sum(res$padj < 0.1, na.rm=TRUE)
+
+	# Create MA plot
+	p_MA = plotMA(res, ylim=c(-2,2))
+	pdf(paste0("MA_", treatment_name, ".plot.png"))
+	p_MA
+	dev.off()
+
+	# collect the results
+	df_res = as.data.frame(res)
+	df_res$focal = c(treatment_name)
+	res_all = rbind(res_all, df_res)
+
+	# Run differential expression analysis with log fold change shrinkage
+	rn = resultsNames(de)
+	coef = rn[grep("focal", rn)[1]] # Get the fist element of rn that starts with "focal"
+	resLFC <- lfcShrink(de, coef=coef, type="apeglm")
+	summary(resLFC)
+
+	# Create LFC MA plot
+	p_MA_LFC =  plotMA(resLFC, ylim=c(-2,2))
+	pdf(paste0("MA_LFC_", treatment_name, ".plot.png"))
+	p_MA_LFC
+	dev.off()
+
+	# collect the results
+	df_res_lfc = as.data.frame(resLFC)
+	df_res_lfc$focal = c(treatment_name)
+	res_lfc_all = rbind(res_lfc_all, df_res_lfc)
+
+}
+```
+
+For now, just focus on genes with significant elevated expresssion.
+```{r}
+padj_thresh = 0.05
+res_all = res_all[(res_all$padj < padj_thresh) && (res_all$log2FoldChange > 0),]
+res_all = res_all[order(res_all$focal, -res_all$log2FoldChange),]
+
+res_lfc_all = res_lfc_all[(res_lfc_all$padj < padj_thresh) && (res_lfc_all$log2FoldChange > 0),]
+res_lfc_all = res_lfc_all[order(res_lfc_all$focal, -res_lfc_all$log2FoldChange),]
 ```
 
 ```{r}
-rld <- DESeq2::rlog( de_id_tissue ) #rlog transform
-vsd <- DESeq2::varianceStabilizingTransformation( de_id_tissue ) #variance Stabilizing Transformation
-		
-notAllZero <- ( rowSums( DESeq2::counts( de_id_tissue ) )>0 )
 ```
 
 ```{r}
-#PCA plot
-data <- DESeq2::plotPCA( rld, intgroup=c("tissue", "collection_id"), returnData=TRUE )
-percentVar <- round( 100 * attr(data, "percentVar") )
-		
-pca <- 
-  ggplot( data, aes( PC1, PC2, color=tissue, shape=collection_id ) ) +
-  geom_point(size=3) + 
-  xlab(paste0("PC1: ",percentVar[1],"% variance")) +  
-  ylab(paste0("PC2:",percentVar[2],"% variance"))
-
-pca
 ```
+
 
 ## Munro et al analyses
 
