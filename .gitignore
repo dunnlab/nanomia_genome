@@ -4,6 +4,7 @@ analyses_de/quant/
 *.RData
 nanomia_deseq_files/
 *.html
+*.plot.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
