@@ -41,8 +41,8 @@ The male gonodendron sample is not replicated, and is an outlier in the PCA. Get
 # to_drop = samples[samples$sex == "male",]$sample
 
 to_drop = c(
-	"SAMN11554597",     # Male gonodendron, very different from other samples
-	"SAMN11554609"      # This developing palpon does not fall out with other palpons
+	"SAMN11554597"#,     # Male gonodendron, very different from other samples
+	#"SAMN11554609"      # This developing palpon does not fall out with other palpons
 )
 ```
 
@@ -74,7 +74,7 @@ summary(res_collection_tissue)
 
 ```{r}
 rld <- DESeq2::rlog( de_collection_tissue ) #rlog transform
-vsd <- DESeq2::varianceStabilizingTransformation( de_id_tissue ) #variance Stabilizing Transformation
+vsd <- DESeq2::varianceStabilizingTransformation( de_collection_tissue ) #variance Stabilizing Transformation
 		
 notAllZero <- ( rowSums( DESeq2::counts( de_collection_tissue ) )>0 )
 ```
@@ -182,8 +182,11 @@ ggplot(pcaData, aes(PC1, PC2, color=tissue, shape=stage)) +
 ## Tissue and stage specific effects
 
 ```{r}
+
+samples_sub = samples[! samples$sample %in% to_drop,]
+
 # get a table of all unique combinations of tissue and stage in the dataset
-tissue_stage <- as.data.frame(unique(samples[,c("tissue","stage")]))
+tissue_stage <- as.data.frame(unique(samples_sub[,c("tissue","stage")]))
 
 # Order it by tissue and stage
 tissue_stage <- tissue_stage[order(tissue_stage$tissue, tissue_stage$stage),]
@@ -210,6 +213,8 @@ for (i in 1:nrow(tissue_stage)) {
 	de  <- DESeqDataSetFromTximport(txi,
 		colData = samples,
 		design = ~ focal )
+
+	de <- de[, ! colnames(de) %in% to_drop]
 
 	de <- DESeq(de)
 
@@ -258,6 +263,29 @@ res_all = res_all[order(res_all$focal, -res_all$log2FoldChange),]
 res_lfc_all = res_lfc_all[(res_lfc_all$padj < padj_thresh) & (res_lfc_all$log2FoldChange > 0),]
 res_lfc_all = res_lfc_all[order(res_lfc_all$focal, -res_lfc_all$log2FoldChange),]
 ```
+
+
+## Integrate annotations
+
+```{r}
+# Read in the annotations
+annotations = read.csv("Nanomia_bijuga.pep.emapper.annotations", sep="\t", stringsAsFactors = FALSE, skip=4)
+annotations <- rename(annotations, query = X.query)
+
+res_all$gene = rownames(res_all)
+res_lfc_all$gene = rownames(res_lfc_all)
+
+res_all = left_join(res_all, annotations, by=join_by(gene==query))
+res_lfc_all = left_join(res_lfc_all, annotations, by=join_by(gene==query))
+
+```
+
+```{r}
+# Write out the results to tsv files
+write.table(res_all, file="res_all.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(res_lfc_all, file="res_lfc_all.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+```
+
 
 ## Munro et al analyses
 

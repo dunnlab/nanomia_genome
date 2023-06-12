@@ -5,6 +5,8 @@ analyses_de/quant/
 nanomia_deseq_files/
 *.html
 *.plot.png
+Nanomia_bijuga.pep.emapper.annotations
+res*.tsv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
