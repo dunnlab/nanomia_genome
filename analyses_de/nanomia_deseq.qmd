@@ -15,11 +15,9 @@ library(pheatmap)
 library(RColorBrewer)
 ```
 
-
 ```{r}
 load("txi.RData")
 ```
-
 
 Wrangle sample data.
 
@@ -51,7 +49,6 @@ Building on [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DES
 ## QC
 
 ### Check for collection_id effect
-
 
 ```{r}
 de_collection_tissue  <- DESeqDataSetFromTximport(txi,
@@ -105,7 +102,6 @@ ggplot(pcaData, aes(PC1, PC2, color=tissue, shape=collection_id)) +
   coord_fixed()
 ```
 
-
 ## tissue + stage patterns
 
 May want to exclude the pneumatophore from some analyses.
@@ -130,7 +126,6 @@ summary(res)
 plotMA(res, ylim=c(-2,2))
 ```
 
-
 ```{r}
 resultsNames(de_stage_tissue)
 ```
@@ -151,7 +146,6 @@ df <- as.data.frame(colData(de_stage_tissue)[,c("stage","tissue")])
 pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
-
 
 ```{r}
 vsd_stage_tissue <- vst(de_stage_tissue, blind=FALSE)
@@ -257,15 +251,18 @@ for (i in 1:nrow(tissue_stage)) {
 ```
 
 For now, just focus on genes with significant elevated expresssion.
+
 ```{r}
 padj_thresh = 0.05
+
+res_all = res_all[!is.na(res_all$padj),]
 res_all = res_all[(res_all$padj < padj_thresh) & (res_all$log2FoldChange > 0),]
 res_all = res_all[order(res_all$focal, -res_all$log2FoldChange),]
 
+res_lfc_all = res_all[!is.na(res_lfc_all$padj),]
 res_lfc_all = res_lfc_all[(res_lfc_all$padj < padj_thresh) & (res_lfc_all$log2FoldChange > 0),]
 res_lfc_all = res_lfc_all[order(res_lfc_all$focal, -res_lfc_all$log2FoldChange),]
 ```
-
 
 ## Integrate annotations
 
@@ -273,10 +270,6 @@ res_lfc_all = res_lfc_all[order(res_lfc_all$focal, -res_lfc_all$log2FoldChange),
 # Read in the annotations
 annotations = read.csv("Nanomia_bijuga.pep.emapper.annotations", sep="\t", stringsAsFactors = FALSE, skip=4)
 annotations <- rename(annotations, query = X.query)
-
-
-
-
 
 res_all = left_join(res_all, annotations, by=join_by(gene==query))
 res_lfc_all = left_join(res_lfc_all, annotations, by=join_by(gene==query))
@@ -289,13 +282,12 @@ write.table(res_all, file="res_all.tsv", sep="\t", quote=FALSE, row.names=FALSE)
 write.table(res_lfc_all, file="res_lfc_all.tsv", sep="\t", quote=FALSE, row.names=FALSE)
 ```
 
-
 ## Munro et al analyses
 
-Previous analyses at: 
+Previous analyses at:
 
-- https://github.com/dunnlab/Siphonophore_Expression/blob/master/Manuscript.Rmd
+-   https://github.com/dunnlab/Siphonophore_Expression/blob/master/Manuscript.Rmd
 
-- https://github.com/dunnlab/Siphonophore_Expression
+-   https://github.com/dunnlab/Siphonophore_Expression
 
-- https://academic.oup.com/mbe/article/39/2/msac027/6521037
+-   https://academic.oup.com/mbe/article/39/2/msac027/6521037
