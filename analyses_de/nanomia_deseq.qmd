@@ -232,6 +232,7 @@ for (i in 1:nrow(tissue_stage)) {
 	# collect the results
 	df_res = as.data.frame(res)
 	df_res$focal = c(treatment_name)
+	df_res$gene = rownames(df_res)
 	res_all = rbind(res_all, df_res)
 
 	# Run differential expression analysis with log fold change shrinkage
@@ -249,6 +250,7 @@ for (i in 1:nrow(tissue_stage)) {
 	# collect the results
 	df_res_lfc = as.data.frame(resLFC)
 	df_res_lfc$focal = c(treatment_name)
+	df_res_lfc$gene = rownames(df_res_lfc)
 	res_lfc_all = rbind(res_lfc_all, df_res_lfc)
 
 }
@@ -272,8 +274,9 @@ res_lfc_all = res_lfc_all[order(res_lfc_all$focal, -res_lfc_all$log2FoldChange),
 annotations = read.csv("Nanomia_bijuga.pep.emapper.annotations", sep="\t", stringsAsFactors = FALSE, skip=4)
 annotations <- rename(annotations, query = X.query)
 
-res_all$gene = rownames(res_all)
-res_lfc_all$gene = rownames(res_lfc_all)
+
+
+
 
 res_all = left_join(res_all, annotations, by=join_by(gene==query))
 res_lfc_all = left_join(res_lfc_all, annotations, by=join_by(gene==query))
