@@ -19,6 +19,7 @@ There are a few fields of particular interest:
 
 - `focal` indicates which tissue and stage combination is being compared to all other samples, for example `gastrozooid_mature`.
 - `log2FoldChange` indicates the log2 fold change in transcript abundance for the focal tissue and stage, relative to all other samples. This is the effect size.
+- `baseMean` The average of the normalized count values. If you were designing probes, genes with high values would be good candidates.
 - `padj` indicates the adjusted p-value for the focal tissue and stage, relative to all other samples. This is the significance.
 - `Description`	
 - `Preferred_name`
