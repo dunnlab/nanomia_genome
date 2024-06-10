@@ -1,3 +1,10 @@
+# Genome stuff
+*.fa
+*.fasta
+*.gff
+
+
+
 .DS_Store
 .Rhistory
 analyses_de/quant/
