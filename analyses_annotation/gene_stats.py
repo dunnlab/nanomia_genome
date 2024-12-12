@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 
+
 def main(input_file, prefix):
     df_gff = pd.read_csv(input_file, sep="\t", comment="#", header=None)
     df_gff.columns = ["seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes"]
@@ -40,16 +41,57 @@ def main(input_file, prefix):
     exon_counts = df_gff[df_gff["type"] == "exon"].groupby("Parent").size()
     df_genes["num_exons"] = df_genes["mRNA_ID"].map(exon_counts).fillna(0).astype(int)
 
-    # Create a new column with the sum of the lengths of all exons for each gene
     exon_lengths = df_gff[df_gff["type"] == "exon"].groupby("Parent")["length"].sum()
     df_genes["exons_length"] = df_genes["mRNA_ID"].map(exon_lengths).fillna(0).astype(int)
     df_genes["introns_length"] = df_genes["length"] - df_genes["exons_length"]
 
-    print(df_genes[["ID", "num_exons", "length", "exons_length", "introns_length"]])
+    df_exons = df_gff[df_gff["type"] == "exon"].copy()
+
+    df_introns = df_exons.copy()
+
+    # Add column intron_length that is the difference between the start of the current
+    # exon and the end of the previous exon
+    df_introns["intron_length"] = df_introns.groupby("Parent")["end"].shift(1).fillna(0)
+    df_introns["intron_length"] = df_introns["start"] - df_introns["intron_length"] - 1
+    df_introns["intron_length"] = df_introns["intron_length"].astype(int)
+
+    # Keep only rows where the Parent is the same as the previous row
+    df_introns = df_introns[df_introns["Parent"] == df_introns["Parent"].shift(1)].copy()
+    df_introns["type"] = "intron"
+
+    df_introns = df_introns[["seqid", "type", "intron_length", "ID", "Parent"]]
+    df_introns.rename(columns={"intron_length": "length"}, inplace=True)
+
+    return df_genes, df_exons, df_introns
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate gene statistics")
     parser.add_argument("input", help="Input gff file")
     parser.add_argument("-p", "--prefix", help="Prefix to filter seqid column")
     args = parser.parse_args()
-    main(args.input, args.prefix)
+    (df_genes, df_exons, df_introns) = main(args.input, args.prefix)
+
+    print("Gene statistics")
+    print(f" Number: {len(df_genes)}")
+    print(f" Min length: {df_genes['length'].min()}")
+    print(f" Max length: {df_genes['length'].max()}")
+    print(f" Mean length: {df_genes['length'].mean()}")
+    print(f" Median length: {df_genes['length'].median()}")
+    print(f" Total length: {df_genes['length'].sum()}")
+
+    print("Exon statistics")
+    print(f" Number: {len(df_exons)}")
+    print(f" Min length: {df_exons['length'].min()}")
+    print(f" Max length: {df_exons['length'].max()}")
+    print(f" Mean length: {df_exons['length'].mean()}")
+    print(f" Median length: {df_exons['length'].median()}")
+    print(f" Total length: {df_exons['length'].sum()}")
+
+    print("Intron statistics")
+    print(f" Number: {len(df_introns)}")
+    print(f" Min length: {df_introns['length'].min()}")
+    print(f" Max length: {df_introns['length'].max()}")
+    print(f" Mean length: {df_introns['length'].mean()}")
+    print(f" Median length: {df_introns['length'].median()}")
+    print(f" Total length: {df_introns['length'].sum()}")
