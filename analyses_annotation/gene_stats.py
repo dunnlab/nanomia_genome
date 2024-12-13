@@ -32,9 +32,7 @@ def main(input_file, prefix):
 
     df_gff['length'] = df_gff['end'] - df_gff['start'] + 1
 
-    gene_ids = set(df_gff[df_gff["type"] == "gene"]["ID"])
-    print(f"Number of genes: {len(gene_ids)}")
-
+    # Create gene data frame
     df_genes = df_gff[df_gff["type"] == "gene"].copy()
     df_genes["mRNA_ID"] = df_genes["ID"] + "-RA"
 
@@ -45,8 +43,16 @@ def main(input_file, prefix):
     df_genes["exons_length"] = df_genes["mRNA_ID"].map(exon_lengths).fillna(0).astype(int)
     df_genes["introns_length"] = df_genes["length"] - df_genes["exons_length"]
 
+    # Add column intergenic_length that is the difference between the start of the current
+    # gene and the end of the previous gene
+    df_genes["intergenic_length"] = df_genes["start"].shift(1).fillna(0)
+    df_genes["intergenic_length"] = df_genes["start"] - df_genes["intergenic_length"] - 1
+    
+
+    # Create exon data frame
     df_exons = df_gff[df_gff["type"] == "exon"].copy()
 
+    # Create intron data frame
     df_introns = df_exons.copy()
 
     # Add column intron_length that is the difference between the start of the current
