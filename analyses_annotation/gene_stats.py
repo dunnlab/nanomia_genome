@@ -41,13 +41,20 @@ def main(input_file, prefix):
 
     exon_lengths = df_gff[df_gff["type"] == "exon"].groupby("Parent")["length"].sum()
     df_genes["exons_length"] = df_genes["mRNA_ID"].map(exon_lengths).fillna(0).astype(int)
-    df_genes["introns_length"] = df_genes["length"] - df_genes["exons_length"]
+    df_genes["introns_length"] = df_genes["length"] - df_genes["exons_length"]#
+
+    # Add column intergenic_distance that is the difference between the start of the current
+    # gene and the end of the previous gene
+    df_genes["intergenic_distance"] = df_genes["start"].shift(1).fillna(0)
+    df_genes["intergenic_distance"] = df_genes["start"] - df_genes["intergenic_distance"] - 1
+
+    # Set intergenic_distance to None for the first gene in each sequence
+    df_genes.loc[df_genes["seqid"] != df_genes["seqid"].shift(1), "intergenic_distance"] = None
 
     # Add column intergenic_length that is the difference between the start of the current
     # gene and the end of the previous gene
     df_genes["intergenic_length"] = df_genes["start"].shift(1).fillna(0)
     df_genes["intergenic_length"] = df_genes["start"] - df_genes["intergenic_length"] - 1
-    
 
     # Create exon data frame
     df_exons = df_gff[df_gff["type"] == "exon"].copy()
@@ -85,6 +92,15 @@ if __name__ == "__main__":
     print(f" Mean length: {df_genes['length'].mean()}")
     print(f" Median length: {df_genes['length'].median()}")
     print(f" Total length: {df_genes['length'].sum()}")
+
+    print("Inter-genic statistics")
+    intergenic_distance = df_genes["intergenic_distance"].dropna()
+    print(f" Number: {len(intergenic_distance)}")
+    print(f" Min length: {intergenic_distance.min()}")
+    print(f" Max length: {intergenic_distance.max()}")
+    print(f" Mean length: {intergenic_distance.mean()}")
+    print(f" Median length: {intergenic_distance.median()}")
+    print(f" Total length: {intergenic_distance.sum()}")
 
     print("Exon statistics")
     print(f" Number: {len(df_exons)}")
