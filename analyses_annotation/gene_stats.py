@@ -1,8 +1,21 @@
 import argparse
 import pandas as pd
+from enum import Enum
 
 
 def main(input_file, prefix):
+
+    class FileType(Enum):
+        GFF = "GFF"
+        GTF = "GTF"
+    
+    if input_file.endswith(".gff"):
+        file_type = FileType.GFF
+    elif input_file.endswith(".gtf"):
+        file_type = FileType.GTF
+    else:
+        raise ValueError("File type not supported")
+
     df_gff = pd.read_csv(input_file, sep="\t", comment="#", header=None)
     df_gff.columns = ["seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes"]
 
@@ -14,6 +27,8 @@ def main(input_file, prefix):
     print(f"Number of rows read: {len(df_gff)}")
     if prefix:
         print(f"Number of rows after filtering by prefix: {len(df_gff)}")
+
+    df_gff['gene_ID'] = None
 
     # Extract attributes and handle missing values with an explicit loop
     attributes_dict = {'ID': [], 'Parent': [], 'Note': []}
@@ -29,18 +44,39 @@ def main(input_file, prefix):
     df_gff['ID'] = attributes_dict['ID']
     df_gff['Parent'] = attributes_dict['Parent']
     df_gff['Note'] = attributes_dict['Note']
+    
+    # Loop over the rows and fill the gene_ID column
+    # if gene, gene_ID = ID
+    # if mRNA, gene_ID = Parent
+    # if CDS, gene_ID = Parent
+    # if exon, gene_ID = Parent with terminal -RA removed
+    gene_ID = None
+    for i, row in df_gff.iterrows():
+        if row["type"] == "gene":
+            gene_ID = row["ID"]
+        elif row["type"] == "mRNA":
+            gene_ID = row["Parent"]
+        elif row["type"] == "CDS":
+            gene_ID = row["Parent"]
+        elif row["type"] == "exon":
+            gene_ID = row["Parent"].replace("-RA", "")
+        df_gff.loc[i, "gene_ID"] = gene_ID
+
+
+
+
+
 
     df_gff['length'] = df_gff['end'] - df_gff['start'] + 1
 
     # Create gene data frame
     df_genes = df_gff[df_gff["type"] == "gene"].copy()
-    df_genes["mRNA_ID"] = df_genes["ID"] + "-RA"
 
-    exon_counts = df_gff[df_gff["type"] == "exon"].groupby("Parent").size()
-    df_genes["num_exons"] = df_genes["mRNA_ID"].map(exon_counts).fillna(0).astype(int)
+    exon_counts = df_gff[df_gff["type"] == "exon"].groupby("gene_ID").size()
+    df_genes["num_exons"] = df_genes["gene_ID"].map(exon_counts).fillna(0).astype(int)
 
-    exon_lengths = df_gff[df_gff["type"] == "exon"].groupby("Parent")["length"].sum()
-    df_genes["exons_length"] = df_genes["mRNA_ID"].map(exon_lengths).fillna(0).astype(int)
+    exon_lengths = df_gff[df_gff["type"] == "exon"].groupby("gene_ID")["length"].sum()
+    df_genes["exons_length"] = df_genes["gene_ID"].map(exon_lengths).fillna(0).astype(int)
     df_genes["introns_length"] = df_genes["length"] - df_genes["exons_length"]#
 
     # Add column intergenic_distance that is the difference between the start of the current
@@ -64,15 +100,15 @@ def main(input_file, prefix):
 
     # Add column intron_length that is the difference between the start of the current
     # exon and the end of the previous exon
-    df_introns["intron_length"] = df_introns.groupby("Parent")["end"].shift(1).fillna(0)
+    df_introns["intron_length"] = df_introns.groupby("gene_ID")["end"].shift(1).fillna(0)
     df_introns["intron_length"] = df_introns["start"] - df_introns["intron_length"] - 1
     df_introns["intron_length"] = df_introns["intron_length"].astype(int)
 
-    # Keep only rows where the Parent is the same as the previous row
-    df_introns = df_introns[df_introns["Parent"] == df_introns["Parent"].shift(1)].copy()
+    # Keep only rows where the gene_ID is the same as the previous row
+    df_introns = df_introns[df_introns["gene_ID"] == df_introns["gene_ID"].shift(1)].copy()
     df_introns["type"] = "intron"
 
-    df_introns = df_introns[["seqid", "type", "intron_length", "ID", "Parent"]]
+    df_introns = df_introns[["seqid", "type", "intron_length", "ID", "gene_ID"]]
     df_introns.rename(columns={"intron_length": "length"}, inplace=True)
 
     return df_genes, df_exons, df_introns
