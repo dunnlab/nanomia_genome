@@ -39,60 +39,26 @@ def main(input_file, prefix):
 
     # Handle the gff case
     if file_type == FileType.GFF:
-
-        # Extract attributes and handle missing values with an explicit loop
-        attributes_dict = {'ID': [], 'Parent': [], 'Note': []}
-        for attributes in df_gff['attributes']:
-            attr_dict = {}
-            for key_value in attributes.split(";"):
-                if "=" in key_value:
-                    key, value = key_value.split("=")
-                    attr_dict[key] = value
-            for key in attributes_dict:
-                attributes_dict[key].append(attr_dict.get(key))
-
-        df_gff['ID'] = attributes_dict['ID']
-        df_gff['Parent'] = attributes_dict['Parent']
-        df_gff['Note'] = attributes_dict['Note']
-
-        # Loop over the rows and fill the gene_ID column
-        # if gene, gene_ID = ID
-        # if mRNA, gene_ID = Parent
-        # if CDS, gene_ID = Parent
-        # if exon, gene_ID = Parent with terminal -RA removed
-        gene_ID = None
-        for i, row in df_gff.iterrows():
-            if row["type"] == "gene":
-                gene_ID = row["ID"]
-            elif row["type"] == "mRNA":
-                gene_ID = row["Parent"]
-            elif row["type"] == "CDS":
-                gene_ID = row["Parent"]
-            elif row["type"] == "exon":
-                gene_ID = row["Parent"].replace("-RA", "")
-            df_gff.loc[i, "gene_ID"] = gene_ID
+        # Extract attributes in a vectorized way
+        df_gff['ID'] = df_gff['attributes'].str.extract(r'ID=([^;]+)')
+        df_gff['Parent'] = df_gff['attributes'].str.extract(r'Parent=([^;]+)')
+        df_gff['Note'] = df_gff['attributes'].str.extract(r'Note=([^;]+)')
+        
+        # Assign gene_ID vectorized
+        df_gff['gene_ID'] = None
+        df_gff.loc[df_gff["type"] == "gene", "gene_ID"] = df_gff["ID"]
+        df_gff.loc[df_gff["type"] == "mRNA", "gene_ID"] = df_gff["Parent"]
+        df_gff.loc[df_gff["type"] == "CDS", "gene_ID"] = df_gff["Parent"]
+        df_gff.loc[df_gff["type"] == "exon", "gene_ID"] = df_gff["Parent"].str.replace("-RA", "", regex=False)
 
     # Handle the gtf case
     elif file_type == FileType.GTF:
-        # Extract attributes specific to GTF
-        attributes_dict = {'gene_id': [], 'transcript_id': []}
-        for attributes in df_gff['attributes']:
-            attr_dict = {'gene_id': None, 'transcript_id': None}
-            for entry in attributes.split(";"):
-                entry = entry.strip()
-                if entry:
-                    key_value = entry.split(" ", 1)  # Split on the first space only
-                    if len(key_value) == 2:
-                        key, value = key_value
-                        value = value.replace('"', '')
-                        if key in attr_dict:
-                            attr_dict[key] = value
-            for key in attributes_dict:
-                attributes_dict[key].append(attr_dict.get(key))
-
-        # Create columns for GTF file
-        df_gff['gene_ID'] = attributes_dict['gene_id']
-        df_gff['transcript_ID'] = attributes_dict['transcript_id']
+        # GTF-specific attribute parsing
+        df_gff['gene_ID'] = df_gff['attributes'].str.extract(r'gene_id "([^"]+)"')
+        df_gff['transcript_ID'] = df_gff['attributes'].str.extract(r'transcript_id "([^"]+)"')
+        
+        # Ensure gene_ID is not empty for rows where it's required
+        df_gff.loc[df_gff['type'] == 'gene', 'gene_ID'] = df_gff['gene_ID']
 
     else:
         raise ValueError("File type not supported")
@@ -185,6 +151,3 @@ if __name__ == "__main__":
     print(f" Total length: {df_introns['length'].sum()}")
 
     print(f"Intron ratio: {df_introns['length'].sum() / df_exons['length'].sum():.3f}")
-
-    # print any lines from df_introns that have negative length
-    print(df_introns[df_introns["length"] < 0])
