@@ -3,7 +3,7 @@ import pandas as pd
 from enum import Enum
 
 
-def main(input_file, prefix):
+def gene_stats(input_file, prefix):
 
     class FileType(Enum):
         GFF = "GFF"
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("input", help="Input gff file")
     parser.add_argument("-p", "--prefix", help="Prefix to filter seqid column")
     args = parser.parse_args()
-    (df_genes, df_exons, df_introns) = main(args.input, args.prefix)
+    (df_genes, df_exons, df_introns) = gene_stats(args.input, args.prefix)
 
     print("Gene statistics")
     print(f" Number: {len(df_genes)}")
