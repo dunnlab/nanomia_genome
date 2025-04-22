@@ -75,6 +75,8 @@ def gene_stats(input_file, prefix):
     df_genes["exons_length"] = df_genes["gene_ID"].map(exon_lengths).fillna(0).astype(int)
     df_genes["introns_length"] = df_genes["length"] - df_genes["exons_length"]
 
+    df_genes["intron_ratio"] = df_genes["introns_length"] / df_genes["exons_length"]
+
     # Add column intergenic_distance that is the difference between the start of the current
     # gene and the end of the previous gene
     df_genes["intergenic_distance"] = df_genes["start"].shift(1).fillna(0)
