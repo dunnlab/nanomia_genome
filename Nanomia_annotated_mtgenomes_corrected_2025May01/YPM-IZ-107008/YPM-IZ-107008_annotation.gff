@@ -1,0 +1,37 @@
+##gff-version 3
+#!gff-spec-version 1.21
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	region	1	4208	.	+	.	ID=scaffold_1--417+:1..4208;Is_circular=False;Name=scaffold_1--417+;genome=mitochondrion;mol_type=genomic	DNA
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	gene	229	1032	.	-	.	ID=gene_cox3;Name=cox3;gene_id=cox3
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	exon	229	1032	562714758.6	-	0	Parent=transcript_cox3;Name=cox3
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	gene	1035	1727	.	-	.	ID=gene_atp6;Name=atp6;gene_id=atp6
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	exon	1035	1727	103520615.6	-	0	Parent=transcript_atp6;Name=atp6
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	gene	1729	2448	.	-	.	ID=gene_cox2;Name=cox2;gene_id=cox2
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitos	exon	1729	2448	397725999.7	-	0	Parent=transcript_cox2;Name=cox2
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitfi	ncRNA_gene	2605	4141	.	+	.	ID=gene_rrnL;Name=rrnL;gene_id=rrnL
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitfi	rRNA	2605	4141	.	+	.	ID=transcript_rrnL;Name=rrnL;Parent=gene_rrnL;gene_id=rrnL
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	mitfi	exon	2605	4141	0.0	+	.	Parent=transcript_rrnL;Name=rrnL
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	region	1	5243	.	+	.	ID=scaffold_2--421+:1..5243;Is_circular=False;Name=scaffold_2--421+;genome=mitochondrion;mol_type=genomic	DNA
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	gene	105	1940	.	+	.	ID=gene_nad5;Name=nad5;gene_id=nad5
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	exon	105	1940	993182751.4	+	0	Parent=transcript_nad5;Name=nad5
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitfi	ncRNA_gene	1916	2778	.	+	.	ID=gene_rrnS;Name=rrnS;gene_id=rrnS
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitfi	rRNA	1916	2778	.	+	.	ID=transcript_rrnS;Name=rrnS;Parent=gene_rrnS;gene_id=rrnS
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitfi	exon	1916	2778	0.0	+	.	Parent=transcript_rrnS;Name=rrnS
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	gene	2818	3393	.	+	.	ID=gene_nad6;Name=nad6;gene_id=nad6
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	exon	2818	3393	2105980.7	+	0	Parent=transcript_nad6;Name=nad6
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	gene	3384	3740	.	+	.	ID=gene_nad3;Name=nad3;gene_id=nad3
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	exon	3384	3740	47618529.4	+	0	Parent=transcript_nad3;Name=nad3
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	gene	3915	4193	.	+	.	ID=gene_nad4l;Name=nad4l;gene_id=nad4l
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	exon	3915	4193	3623946.0	+	0	Parent=transcript_nad4l;Name=nad4l
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	gene	4195	5184	.	+	.	ID=gene_nad1;Name=nad1;gene_id=nad1
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	mitos	exon	4195	5184	632081003.1	+	0	Parent=transcript_nad1;Name=nad1
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	region	1	4615	.	+	.	ID=scaffold_3--423+:1..4615;Is_circular=False;Name=scaffold_3--423+;genome=mitochondrion;mol_type=genomic	DNA
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	gene	19	1212	.	+	.	ID=gene_nad4;Name=nad4;gene_id=nad4
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	exon	19	1212	436756979.3	+	0	Parent=transcript_nad4;Name=nad4
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	gene	1214	2377	.	+	.	ID=gene_cob_0;Name=cob_0;gene_id=cob_0
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	exon	1214	2377	1311306217.4	+	0	Parent=transcript_cob_0;Name=cob_0
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	gene	2544	2750	.	+	.	ID=gene_cob_1;Name=cob_1;gene_id=cob_1
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	exon	2544	2750	13161474.0	+	0	Parent=transcript_cob_1;Name=cob_1
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	gene	3004	4575	.	+	.	ID=gene_cox1;Name=cox1;gene_id=cox1
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_3--423+	mitos	exon	3004	4575	2438518907.8	+	0	Parent=transcript_cox1;Name=cox1
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_1--417+	tRNAscan-SE	tRNA	154	224	.	-	.	ID=trnM-CAT;Name=trnM-CAT
+YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_YPM-IZ-107008_mtgenome_scaffold_2--421+	tRNAscan-SE	tRNA	2772	2841	.	+	.	ID=trnT-TCA;Name=trnT-TCA

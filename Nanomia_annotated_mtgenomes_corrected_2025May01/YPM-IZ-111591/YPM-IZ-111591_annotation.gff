@@ -1,0 +1,35 @@
+##gff-version 3
+#!gff-spec-version 1.21
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	region	1	14625	.	+	.	ID=scaffold_1--7+:1..14625;Is_circular=False;Name=scaffold_1--7+;genome=mitochondrion;mol_type=genomic	DNA
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	44	1516	.	-	.	ID=gene_cox1;Name=cox1;gene_id=cox1
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	44	1516	2320401545.1	-	0	Parent=transcript_cox1;Name=cox1
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	1648	2790	.	-	.	ID=gene_cob;Name=cob;gene_id=cob
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	1648	2790	1289964862.8	-	0	Parent=transcript_cob;Name=cob
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	2792	4258	.	-	.	ID=gene_nad4;Name=nad4;gene_id=nad4
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	2792	4258	470001636.1	-	0	Parent=transcript_nad4;Name=nad4
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	4219	5208	.	-	.	ID=gene_nad1;Name=nad1;gene_id=nad1
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	4219	5208	622933475.1	-	0	Parent=transcript_nad1;Name=nad1
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	5209	5496	.	-	.	ID=gene_nad4l;Name=nad4l;gene_id=nad4l
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	5209	5496	5649043.3	-	0	Parent=transcript_nad4l;Name=nad4l
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	5487	5843	.	-	.	ID=gene_nad3;Name=nad3;gene_id=nad3
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	5487	5843	46457391.2	-	0	Parent=transcript_nad3;Name=nad3
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	5834	6409	.	-	.	ID=gene_nad6;Name=nad6;gene_id=nad6
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	5834	6409	2272892.2	-	0	Parent=transcript_nad6;Name=nad6
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitfi	ncRNA_gene	6449	7318	.	-	.	ID=gene_rrnS;Name=rrnS;gene_id=rrnS
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitfi	rRNA	6449	7318	.	-	.	ID=transcript_rrnS;Name=rrnS;Parent=gene_rrnS;gene_id=rrnS
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitfi	exon	6449	7318	0.0	-	.	Parent=transcript_rrnS;Name=rrnS
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	7322	9139	.	-	.	ID=gene_nad5;Name=nad5;gene_id=nad5
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	7322	9139	915538406.8	-	0	Parent=transcript_nad5;Name=nad5
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	9139	10401	.	-	.	ID=gene_nad2;Name=nad2;gene_id=nad2
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	9139	10401	140418155.7	-	0	Parent=transcript_nad2;Name=nad2
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	10634	11440	.	-	.	ID=gene_cox3;Name=cox3;gene_id=cox3
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	10634	11440	555441289.2	-	0	Parent=transcript_cox3;Name=cox3
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	11440	12132	.	-	.	ID=gene_atp6;Name=atp6;gene_id=atp6
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	11440	12132	107823617.5	-	0	Parent=transcript_atp6;Name=atp6
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	gene	12134	12853	.	-	.	ID=gene_cox2;Name=cox2;gene_id=cox2
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitos	exon	12134	12853	399499210.0	-	0	Parent=transcript_cox2;Name=cox2
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitfi	ncRNA_gene	13016	14555	.	+	.	ID=gene_rrnL;Name=rrnL;gene_id=rrnL
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitfi	rRNA	13016	14555	.	+	.	ID=transcript_rrnL;Name=rrnL;Parent=gene_rrnL;gene_id=rrnL
+YPM-IZ-111591_mtgenome_scaffold_1--7+	mitfi	exon	13016	14555	0.0	+	.	Parent=transcript_rrnL;Name=rrnL
+YPM-IZ-111591_mtgenome_scaffold_1--7+	tRNAscan-SE	tRNA	10559	10629	.	-	.	ID=trnM-CAT;Name=trnM-CAT
+YPM-IZ-111591_mtgenome_scaffold_1--7+	tRNAscan-SE	tRNA	6386	6455	.	-	.	ID=trnT-TCA;Name=trnT-TCA
