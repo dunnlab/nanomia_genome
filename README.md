@@ -1,5 +1,8 @@
-# nanomia_genome
+# Nanomia septata genome
 
+This repo contains analyses and supporting material for the paper:
+
+> Ahuja N, Schultz DT, Destanović D, Church SH, Picciani N, Munro C, Kon-Nanjo K, Kon T, Mańko MK, Shi W, Haddock SHD, Simakov O, Dunn CW. 2025. A chromosome-scale genome of Nanomia septata reveals extensive rearrangement but no clear driver of the unique colony-level organization of siphonophores. bioRxiv. https://doi.org/10.1101/2025.05.01.651713
 
 ## analyses_de
 
